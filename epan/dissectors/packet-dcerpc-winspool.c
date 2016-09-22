@@ -36,6 +36,7 @@ static gint ett_iremotewinspool_winspool_UploadPrinterDriverPackageFlags = -1;
 /* Header field declarations */
 static gint hf_iremotewinspool_hresult = -1;
 static gint hf_iremotewinspool_opnum = -1;
+static gint hf_iremotewinspool_sec_desc_buf_len = -1;
 static gint hf_iremotewinspool_werror = -1;
 static gint hf_iremotewinspool_winspool_AsyncAbortPrinter_hPrinter = -1;
 static gint hf_iremotewinspool_winspool_AsyncAddForm_hPrinter = -1;
@@ -995,6 +996,25 @@ static int iremotewinspool_dissect_element_winspool_AsyncEnumJobNamedProperties_
 static int iremotewinspool_dissect_element_winspool_AsyncLogJobInfoForBranchOffice_hPrinter(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_);
 static int iremotewinspool_dissect_element_winspool_AsyncLogJobInfoForBranchOffice_pBranchOfficeJobDataContainer(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_);
 static int iremotewinspool_dissect_element_winspool_AsyncLogJobInfoForBranchOffice_pBranchOfficeJobDataContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_);
+	#include "packet-smb.h"
+	#include "packet-smb-browse.h"
+extern struct access_mask_info spoolss_printer_access_mask_info;
+static int
+iremotewinspool_dissect_sec_desc_buf(tvbuff_t *tvb, int offset, packet_info *pinfo, proto_tree *tree, dcerpc_info* di, guint8 *drep)
+{
+	guint32 len;
+	if(di->conformant_run){
+		/*just a run to handle conformant arrays, nothing to dissect */
+		return offset;
+	}
+	offset = dissect_ndr_uint32 (tvb, offset, pinfo, tree, di, drep,
+		hf_iremotewinspool_sec_desc_buf_len, &len);
+	dissect_nt_sec_desc(
+		tvb, offset, pinfo, tree, drep, TRUE, len,
+		&spoolss_printer_access_mask_info);
+	offset += len;
+	return offset;
+}
 
 
 /* IDL: struct { */
@@ -1012,7 +1032,7 @@ iremotewinspool_dissect_element_winspool_NOTIFY_REPLY_CONTAINER_pInfo(tvbuff_t *
 static int
 iremotewinspool_dissect_element_winspool_NOTIFY_REPLY_CONTAINER_pInfo_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_NotifyInfo(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_NOTIFY_REPLY_CONTAINER_pInfo,0);
+	offset = dissect_NOTIFY_INFO(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1062,7 +1082,7 @@ iremotewinspool_dissect_element_winspool_NOTIFY_OPTIONS_CONTAINER_pOptions(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_NOTIFY_OPTIONS_CONTAINER_pOptions_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_NotifyOption(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_NOTIFY_OPTIONS_CONTAINER_pOptions,0);
+	offset = dissect_NOTIFY_OPTION(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1182,7 +1202,7 @@ iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertyByte(tv
 static int
 iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertyTimeContainer(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_TimeCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_PrintPropertyValueUnion_propertyTimeContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1190,7 +1210,7 @@ iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertyTimeCon
 static int
 iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertyDevModeContainer(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_PrintPropertyValueUnion_propertyDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1198,7 +1218,7 @@ iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertyDevMode
 static int
 iremotewinspool_dissect_element_winspool_PrintPropertyValueUnion_propertySDContainer(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_sec_desc_buf(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_PrintPropertyValueUnion_propertySDContainer,0);
+	offset = iremotewinspool_dissect_sec_desc_buf(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1597,7 +1617,7 @@ iremotewinspool_dissect_element_winspool_AsyncOpenPrinter_pDevModeContainer(tvbu
 static int
 iremotewinspool_dissect_element_winspool_AsyncOpenPrinter_pDevModeContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncOpenPrinter_pDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1621,7 +1641,7 @@ iremotewinspool_dissect_element_winspool_AsyncOpenPrinter_pClientInfo(tvbuff_t *
 static int
 iremotewinspool_dissect_element_winspool_AsyncOpenPrinter_pClientInfo_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_UserLevelCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncOpenPrinter_pClientInfo,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1699,7 +1719,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pPrinterContainer(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pPrinterContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_SetPrinterInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPrinter_pPrinterContainer,0);
+	offset = dissect_SPOOL_PRINTER_INFO(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1715,7 +1735,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pDevModeContainer(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pDevModeContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPrinter_pDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1731,7 +1751,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pSecurityContainer(tvbu
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pSecurityContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_sec_desc_buf(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPrinter_pSecurityContainer,0);
+	offset = iremotewinspool_dissect_sec_desc_buf(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1747,7 +1767,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pClientInfo(tvbuff_t *t
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPrinter_pClientInfo_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_UserLevelCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPrinter_pClientInfo,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -1838,7 +1858,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetJob_pJobContainer(tvbuff_t *tvb
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetJob_pJobContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_JobInfoContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetJob_pJobContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -2361,7 +2381,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pPrinterContainer(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pPrinterContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_SetPrinterInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetPrinter_pPrinterContainer,0);
+	offset = dissect_SPOOL_PRINTER_INFO(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -2377,7 +2397,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pDevModeContainer(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pDevModeContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetPrinter_pDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -2393,7 +2413,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pSecurityContainer(tvbu
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetPrinter_pSecurityContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_sec_desc_buf(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetPrinter_pSecurityContainer,0);
+	offset = iremotewinspool_dissect_sec_desc_buf(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -2571,7 +2591,7 @@ iremotewinspool_dissect_element_winspool_AsyncStartDocPrinter_pDocInfoContainer(
 static int
 iremotewinspool_dissect_element_winspool_AsyncStartDocPrinter_pDocInfoContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DocumentInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncStartDocPrinter_pDocInfoContainer,0);
+	offset = dissect_spoolss_doc_info_ctr(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -3452,7 +3472,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddForm_pFormInfoContainer(tvbuff_
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddForm_pFormInfoContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_AddFormInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddForm_pFormInfoContainer,0);
+	offset = dissect_FORM_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -3711,7 +3731,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetForm_pFormInfoContainer(tvbuff_
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetForm_pFormInfoContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_AddFormInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetForm_pFormInfoContainer,0);
+	offset = dissect_FORM_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -4910,7 +4930,7 @@ iremotewinspool_dissect_element_winspool_AsyncSendRecvBidiData_pReqData(tvbuff_t
 static int
 iremotewinspool_dissect_element_winspool_AsyncSendRecvBidiData_pReqData_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_RPC_BIDI_REQUEST_CONTAINER(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSendRecvBidiData_pReqData,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -4934,7 +4954,7 @@ iremotewinspool_dissect_element_winspool_AsyncSendRecvBidiData_ppRespData_(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncSendRecvBidiData_ppRespData__(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_RPC_BIDI_RESPONSE_CONTAINER(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSendRecvBidiData_ppRespData,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -5011,7 +5031,7 @@ iremotewinspool_dissect_element_winspool_AsyncCreatePrinterIC_pDevModeContainer(
 static int
 iremotewinspool_dissect_element_winspool_AsyncCreatePrinterIC_pDevModeContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncCreatePrinterIC_pDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -5398,7 +5418,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPrinterDriver_pDriverContainer(
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPrinterDriver_pDriverContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_AddDriverInfoCtr(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPrinterDriver_pDriverContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -6664,7 +6684,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPort_pPortContainer(tvbuff_t *t
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPort_pPortContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_SetPortInfoContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPort_pPortContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -6680,7 +6700,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddPort_pPortVarContainer(tvbuff_t
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddPort_pPortVarContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_PortVarContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddPort_pPortVarContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -6789,7 +6809,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetPort_pPortContainer(tvbuff_t *t
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetPort_pPortContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_SetPortInfoContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetPort_pPortContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -6857,7 +6877,7 @@ iremotewinspool_dissect_element_winspool_AsyncAddMonitor_pMonitorContainer(tvbuf
 static int
 iremotewinspool_dissect_element_winspool_AsyncAddMonitor_pMonitorContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_MonitorContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncAddMonitor_pMonitorContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -8177,7 +8197,7 @@ iremotewinspool_dissect_element_winspool_AsyncGetCorePrinterDrivers_pCorePrinter
 static int
 iremotewinspool_dissect_element_winspool_AsyncGetCorePrinterDrivers_pCorePrinterDrivers__(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_CorePrinterDriver(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncGetCorePrinterDrivers_pCorePrinterDrivers,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -8741,7 +8761,7 @@ iremotewinspool_dissect_element_winspool_AsyncResetPrinter_pDevModeContainer(tvb
 static int
 iremotewinspool_dissect_element_winspool_AsyncResetPrinter_pDevModeContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_DevmodeContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncResetPrinter_pDevModeContainer,0);
+	offset = dissect_DEVMODE_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -8825,7 +8845,7 @@ iremotewinspool_dissect_element_winspool_AsyncGetJobNamedPropertyValue_pValue(tv
 static int
 iremotewinspool_dissect_element_winspool_AsyncGetJobNamedPropertyValue_pValue_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_PrintPropertyValue(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncGetJobNamedPropertyValue_pValue,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -8894,7 +8914,7 @@ iremotewinspool_dissect_element_winspool_AsyncSetJobNamedProperty_pProperty(tvbu
 static int
 iremotewinspool_dissect_element_winspool_AsyncSetJobNamedProperty_pProperty_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_PrintNamedProperty(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncSetJobNamedProperty_pProperty,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -9059,7 +9079,7 @@ iremotewinspool_dissect_element_winspool_AsyncEnumJobNamedProperties_ppPropertie
 static int
 iremotewinspool_dissect_element_winspool_AsyncEnumJobNamedProperties_ppProperties___(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_PrintNamedProperty(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncEnumJobNamedProperties_ppProperties,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -9121,7 +9141,7 @@ iremotewinspool_dissect_element_winspool_AsyncLogJobInfoForBranchOffice_pBranchO
 static int
 iremotewinspool_dissect_element_winspool_AsyncLogJobInfoForBranchOffice_pBranchOfficeJobDataContainer_(tvbuff_t *tvb _U_, int offset _U_, packet_info *pinfo _U_, proto_tree *tree _U_, dcerpc_info* di _U_, guint8 *drep _U_)
 {
-	offset = iremotewinspool_dissect_struct_spoolss_BranchOfficeJobDataContainer(tvb,offset,pinfo,tree,di,drep,hf_iremotewinspool_winspool_AsyncLogJobInfoForBranchOffice_pBranchOfficeJobDataContainer,0);
+	offset = dissect_USER_LEVEL_CTR(tvb, offset, pinfo, tree, di, drep);
 
 	return offset;
 }
@@ -9318,6 +9338,8 @@ void proto_register_dcerpc_iremotewinspool(void)
 	  { "HRES Windows Error", "iremotewinspool.hresult", FT_UINT32, BASE_HEX, VALS(HRES_errors), 0, NULL, HFILL }},
 	{ &hf_iremotewinspool_opnum,
 	  { "Operation", "iremotewinspool.opnum", FT_UINT16, BASE_DEC, NULL, 0, NULL, HFILL }},
+	{ &hf_iremotewinspool_sec_desc_buf_len,
+	  { "Sec Desc Buf Len", "iremotewinspool.sec_desc_buf_len", FT_UINT32, BASE_DEC, NULL, 0, NULL, HFILL }},
 	{ &hf_iremotewinspool_werror,
 	  { "Windows Error", "iremotewinspool.werror", FT_UINT32, BASE_HEX, VALS(WERR_errors), 0, NULL, HFILL }},
 	{ &hf_iremotewinspool_winspool_AsyncAbortPrinter_hPrinter,

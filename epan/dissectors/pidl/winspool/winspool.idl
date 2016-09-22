@@ -20,7 +20,7 @@
  *
  */
 
-import "misc.idl", "security.idl", "winreg.idl", "spoolss.idl";
+import "misc.idl", "winreg.idl", "spoolss.idl";
 
 [
 	uuid("76f03f96-cdfd-44fc-a22c-64950A001209"),

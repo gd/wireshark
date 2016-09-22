@@ -1624,7 +1624,7 @@ dissect_DEVMODE(tvbuff_t *tvb, int offset, packet_info *pinfo,
 
 static gint ett_DEVMODE_CTR = -1;
 
-static int
+int
 dissect_DEVMODE_CTR(tvbuff_t *tvb, int offset, packet_info *pinfo,
 			       proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {
@@ -2420,7 +2420,7 @@ dissect_USER_LEVEL_1(tvbuff_t *tvb, int offset,
 
 static gint ett_USER_LEVEL_CTR = -1;
 
-static int
+int
 dissect_USER_LEVEL_CTR(tvbuff_t *tvb, int offset,
 				  packet_info *pinfo, proto_tree *tree,
 				  dcerpc_info *di, guint8 *drep)
@@ -2696,7 +2696,7 @@ char *notify_plural(int count)
 
 static gint ett_NOTIFY_OPTION = -1;
 
-static int
+int
 dissect_NOTIFY_OPTION(tvbuff_t *tvb, int offset, packet_info *pinfo,
 		      proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {
@@ -3255,7 +3255,7 @@ static gint ett_SPOOL_PRINTER_INFO_LEVEL = -1;
 static int hf_spool_printer_info_devmode_ptr = -1;
 static int hf_spool_printer_info_secdesc_ptr = -1;
 
-static int
+int
 dissect_SPOOL_PRINTER_INFO(tvbuff_t *tvb, int offset, packet_info *pinfo,
 			   proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {
@@ -3904,7 +3904,7 @@ dissect_FORM_1(tvbuff_t *tvb, int offset, packet_info *pinfo,
 
 static gint ett_FORM_CTR = -1;
 
-static int
+int
 dissect_FORM_CTR(tvbuff_t *tvb, int offset,
 			    packet_info *pinfo, proto_tree *tree,
 			    dcerpc_info *di, guint8 *drep)
@@ -4771,7 +4771,7 @@ dissect_spoolss_doc_info(tvbuff_t *tvb, int offset, packet_info *pinfo,
 
 static gint ett_DOC_INFO_CTR = -1;
 
-static int
+int
 dissect_spoolss_doc_info_ctr(tvbuff_t *tvb, int offset, packet_info *pinfo,
 			     proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {
@@ -5956,7 +5956,7 @@ dissect_NOTIFY_INFO_DATA(tvbuff_t *tvb, int offset, packet_info *pinfo,
 	return offset;
 }
 
-static int
+int
 dissect_NOTIFY_INFO(tvbuff_t *tvb, int offset, packet_info *pinfo,
 		    proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {

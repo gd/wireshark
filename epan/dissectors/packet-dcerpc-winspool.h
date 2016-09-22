@@ -9,7 +9,6 @@
 */
 
 #include "packet-dcerpc-misc.h"
-#include "packet-dcerpc-security.h"
 #include "packet-dcerpc-winreg.h"
 #include "packet-dcerpc-spoolss.h"
 
