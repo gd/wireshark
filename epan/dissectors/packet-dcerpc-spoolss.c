@@ -101,6 +101,9 @@ static int hf_textstatus = -1;
 static int hf_sepfile = -1;
 static int hf_printprocessor = -1;
 static int hf_parameters = -1;
+static int hf_language = -1;
+static int hf_package_id = -1;
+static int hf_driver_package_cab_size = -1;
 
 /* Printer information */
 
@@ -6523,6 +6526,58 @@ SpoolssGetPrinterDriverDirectory_r(tvbuff_t *tvb, int offset,
 	return offset;
 }
 
+static int
+SpoolssGetPrinterDriverPackagePath_q(tvbuff_t *tvb, int offset,
+				     packet_info *pinfo, proto_tree *tree,
+				     dcerpc_info *di, guint8 *drep)
+{
+	/* Parse packet */
+
+	offset = dissect_ndr_str_pointer_item(
+		tvb, offset, pinfo, tree, di, drep, NDR_POINTER_UNIQUE,
+		"Name", hf_servername, 0);
+
+	offset = dissect_ndr_str_pointer_item(
+		tvb, offset, pinfo, tree, di, drep, NDR_POINTER_REF,
+		"Environment", hf_environment, 0);
+
+	offset = dissect_ndr_str_pointer_item(
+		tvb, offset, pinfo, tree, di, drep, NDR_POINTER_UNIQUE,
+		"Language", hf_language, 0);
+
+	offset = dissect_ndr_str_pointer_item(
+		tvb, offset, pinfo, tree, di, drep, NDR_POINTER_REF,
+		"PackageId", hf_package_id, 0);
+
+	offset = dissect_spoolss_buffer(
+		tvb, offset, pinfo, tree, di, drep, NULL);
+
+	offset = dissect_ndr_uint32(
+		tvb, offset, pinfo, tree, di, drep,
+		hf_driver_package_cab_size, NULL);
+
+	return offset;
+}
+
+static int
+SpoolssGetPrinterDriverPackagePath_r(tvbuff_t *tvb, int offset,
+				     packet_info *pinfo, proto_tree *tree,
+				     dcerpc_info *di, guint8 *drep)
+{
+	/* Parse packet */
+
+	offset = dissect_spoolss_string_parm(
+		tvb, offset, pinfo, tree, di, drep, "DriverPackageCab");
+
+	offset = dissect_ndr_uint32(
+		tvb, offset, pinfo, tree, di, drep, hf_needed, NULL);
+
+	offset = dissect_doserror(
+		tvb, offset, pinfo, tree, di, drep, hf_rc, NULL);
+
+	return offset;
+}
+
 /*
  * List of subdissectors for this pipe.
  */
@@ -6693,7 +6748,8 @@ static dcerpc_sub_dissector dcerpc_spoolss_dissectors[] = {
 	{ SPOOLSS_GETCOREPRINTERDRIVERS, "GetCorePrinterDrivers",
 	  NULL, SpoolssGeneric_r },
 	{ SPOOLSS_GETPRINTERDRIVERPACKAGEPATH, "GetPrinterDriverPackagePath",
-	  NULL, SpoolssGeneric_r },
+	  SpoolssGetPrinterDriverPackagePath_q,
+	  SpoolssGetPrinterDriverPackagePath_r },
 	{ 0, NULL, NULL, NULL },
 };
 
