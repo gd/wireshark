@@ -6690,7 +6690,10 @@ static dcerpc_sub_dissector dcerpc_spoolss_dissectors[] = {
 	  NULL, SpoolssGeneric_r },
 	{ SPOOLSS_ADDPRINTERDRIVEREX, "AddPrinterDriverEx",
 	  NULL, SpoolssGeneric_r },
-
+	{ SPOOLSS_GETCOREPRINTERDRIVERS, "GetCorePrinterDrivers",
+	  NULL, SpoolssGeneric_r },
+	{ SPOOLSS_GETPRINTERDRIVERPACKAGEPATH, "GetPrinterDriverPackagePath",
+	  NULL, SpoolssGeneric_r },
 	{ 0, NULL, NULL, NULL },
 };
 
