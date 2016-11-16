@@ -3763,12 +3763,13 @@ static int
 SpoolssEnumPrinters_r(tvbuff_t *tvb, int offset, packet_info *pinfo,
 				 proto_tree *tree, dcerpc_info *di, guint8 *drep)
 {
-	guint32 num_drivers;
+	guint32 num_printers, i;
 	dcerpc_call_value *dcv = (dcerpc_call_value *)di->call_data;
 	gint16 level = GPOINTER_TO_INT(dcv->se_data);
 	BUFFER buffer;
-	proto_item *item;
-	proto_tree *subtree = NULL;
+//	proto_item *item;
+//	proto_tree *subtree = NULL;
+	int buffer_offset;
 
 	col_append_fstr(pinfo->cinfo, COL_INFO, ", level %d", level);
 
@@ -3777,6 +3778,53 @@ SpoolssEnumPrinters_r(tvbuff_t *tvb, int offset, packet_info *pinfo,
 	offset = dissect_spoolss_buffer(
 		tvb, offset, pinfo, tree, di, drep, &buffer);
 
+	offset = dissect_ndr_uint32(
+		tvb, offset, pinfo, tree, di, drep, hf_needed, NULL);
+
+	offset = dissect_ndr_uint32(
+		tvb, offset, pinfo, tree, di, drep, hf_returned,
+		&num_printers);
+
+	buffer_offset = 0;
+#if 1
+	for (i = 0; i < num_printers; i++) {
+		switch (level) {
+		case 0:
+			buffer_offset = dissect_PRINTER_INFO_0(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		case 1:
+			buffer_offset = dissect_PRINTER_INFO_1(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		case 2:
+			buffer_offset = dissect_PRINTER_INFO_2(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		case 3:
+			buffer_offset = dissect_PRINTER_INFO_3(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		case 5:
+			buffer_offset = dissect_PRINTER_INFO_5(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		case 7:
+			buffer_offset = dissect_PRINTER_INFO_7(
+				buffer.tvb, buffer_offset, pinfo,
+				buffer.tree, di, drep);
+			break;
+		default:
+		//	expert_add_info(pinfo, item, &ei_printer_info_level);
+			break;
+		}
+	}
+#else
 	if (buffer.tvb) {
 		subtree = proto_tree_add_subtree_format( buffer.tree, buffer.tvb, 0, -1, ett_PRINTER_INFO, &item, "Print info level %d", level);
 
@@ -3810,14 +3858,7 @@ SpoolssEnumPrinters_r(tvbuff_t *tvb, int offset, packet_info *pinfo,
 			break;
 		}
 	}
-
-	offset = dissect_ndr_uint32(
-		tvb, offset, pinfo, tree, di, drep, hf_needed, NULL);
-
-	offset = dissect_ndr_uint32(
-		tvb, offset, pinfo, tree, di, drep, hf_returned,
-		&num_drivers);
-
+#endif
 	offset = dissect_doserror(
 		tvb, offset, pinfo, tree, di, drep, hf_rc, NULL);
 
